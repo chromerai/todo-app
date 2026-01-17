@@ -1,0 +1,287 @@
+# Replit Prompt: To-Do List Application Frontend
+
+Create a React frontend application for a to-do list app with the following specifications:
+
+## Tech Stack
+- **Frontend Framework**: React with Vite
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM
+- **Backend**: Supabase (client integration only - database already configured)
+- **State Management**: React hooks (useState, useEffect, useContext)
+
+## Environment Setup
+The app expects these environment variables in `.env`:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+## Application Structure (3 Pages)
+
+### 1. Sign-In/Sign-Up Page (`/`)
+- Clean, centered form design
+- Toggle between Sign-In and Sign-Up modes with a button/link
+- **Sign-In Form:**
+  - Email input field
+  - Password input field
+  - "Sign In" button
+  - Link to switch to Sign-Up mode
+- **Sign-Up Form:**
+  - Email input field
+  - Password input field
+  - Confirm password input field
+  - "Sign Up" button
+  - Link to switch to Sign-In mode
+- Form validation with error messages displayed inline
+- Loading state on submit buttons
+- Redirect to `/dashboard` after successful authentication
+- Display error messages from Supabase (invalid credentials, user exists, etc.)
+- Modern, minimal design with branded header
+
+### 2. Main Dashboard Page (`/dashboard`)
+- **Header:**
+  - App title/logo on the left
+  - User email display
+  - "Sign Out" button on the right
+- **Lists Display:**
+  - Grid layout of list cards (responsive: 1 column mobile, 2-3 columns desktop)
+  - Each list card shows:
+    - List name (large, bold)
+    - List type badge (if exists - e.g., "General", "Groceries")
+    - Task statistics (e.g., "5 tasks • 2 completed")
+    - Entire card is clickable to navigate to list detail page
+    - Hover effect on cards
+- **Add New List Section:**
+  - Prominent "+ Add New List" button or card
+  - Opens inline form or modal with:
+    - List name input
+    - Optional list type dropdown/input
+    - "Create" and "Cancel" buttons
+- **Empty State:**
+  - Show when user has no lists
+  - Helpful message: "No lists yet. Create your first list to get started!"
+  - Large "+ Create Your First List" button
+- Loading skeleton while fetching lists
+- Smooth fade-in animations for list cards
+
+### 3. To-Do List Detail Page (`/list/:listId`)
+- **Header:**
+  - "← Back" button to return to dashboard
+  - List name (click to edit inline, auto-save on blur)
+  - "Delete List" button (trash icon) - shows confirmation dialog
+  - "Sign Out" button
+- **Add Task Section:**
+  - Input field: "Add a new task..."
+  - Enter key or "+" button to add task
+  - Clear input after adding
+- **Tasks List:**
+  - Each task item displays:
+    - Checkbox (left side) to toggle completion
+    - Task text (click to edit inline, save on blur or Enter)
+    - Delete button (trash icon, right side)
+    - Strikethrough styling when completed
+    - Fade/opacity effect for completed tasks
+  - Tasks ordered by creation date (newest first) or custom order
+  - Smooth animations for adding/removing tasks
+- **Empty State:**
+  - Show when list has no tasks
+  - Message: "No tasks yet. Add your first task above!"
+- Loading state while fetching tasks
+- Confirmation dialog before deleting list: "Delete this list and all its tasks?"
+
+## Supabase Integration
+
+### Initialize Supabase Client
+Create `src/lib/supabaseClient.js`:
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```
+
+### Authentication Functions Needed
+- `signUp(email, password)` - Create new user
+- `signIn(email, password)` - Sign in existing user
+- `signOut()` - Sign out current user
+- `getCurrentUser()` - Get current authenticated user
+- Listen to auth state changes
+
+### Database Operations Needed
+
+**Lists:**
+- `fetchUserLists(userId)` - Get all lists for user
+- `createList(userId, listName, listType)` - Create new list
+- `updateListName(listId, newName)` - Update list name
+- `deleteList(listId)` - Delete list and cascade tasks
+
+**Tasks:**
+- `fetchListTasks(listId)` - Get all tasks for a list
+- `createTask(listId, taskText)` - Add new task
+- `updateTaskText(taskId, newText)` - Edit task text
+- `toggleTaskComplete(taskId, isCompleted)` - Toggle completion
+- `deleteTask(taskId)` - Delete task
+
+### Database Schema Reference
+The app works with these tables (already set up in Supabase):
+
+**lists:**
+- listId (UUID)
+- userId (UUID)
+- list_name (TEXT)
+- list_type (TEXT)
+- createdAt (TIMESTAMP)
+- updatedAt (TIMESTAMP)
+
+**tasks:**
+- taskId (UUID)
+- listId (UUID)
+- task_text (TEXT)
+- isCompleted (BOOLEAN)
+- order (INTEGER)
+- createdAt (TIMESTAMP)
+- updatedAt (TIMESTAMP)
+
+## Routing Implementation
+Use React Router v6:
+- `/` - Sign-In/Sign-Up page (public)
+- `/dashboard` - Main dashboard (protected)
+- `/list/:listId` - Individual list detail (protected)
+
+**Protected Routes:**
+- Check if user is authenticated
+- Redirect to `/` if not authenticated
+- Show loading state while checking auth
+
+## Component Structure
+```
+src/
+├── components/
+│   ├── Auth/
+│   │   ├── AuthPage.jsx (combined sign-in/sign-up)
+│   ├── Dashboard/
+│   │   ├── Dashboard.jsx
+│   │   ├── ListCard.jsx
+│   │   └── AddListForm.jsx
+│   ├── TodoList/
+│   │   ├── TodoListPage.jsx
+│   │   ├── TaskItem.jsx
+│   │   └── AddTaskInput.jsx
+│   ├── Common/
+│   │   ├── Header.jsx
+│   │   ├── ConfirmDialog.jsx
+│   │   └── LoadingSpinner.jsx
+│   └── ProtectedRoute.jsx
+├── context/
+│   └── AuthContext.jsx (manages auth state globally)
+├── lib/
+│   └── supabaseClient.js
+├── App.jsx
+├── main.jsx
+└── index.css (Tailwind imports)
+```
+
+## UI/UX Requirements
+
+### Styling
+- Use Tailwind CSS utility classes
+- Color scheme: Modern, clean (suggest blue/indigo primary, gray neutrals)
+- Rounded corners on cards and buttons
+- Subtle shadows on cards
+- Smooth transitions on hover states
+- Focus states for accessibility
+
+### Interactions
+- All forms validate before submission
+- Show loading spinners during async operations
+- Display success/error toast messages or inline alerts
+- Smooth page transitions
+- Optimistic UI updates where appropriate
+- Debounce inline editing
+
+### Responsive Design
+- Mobile-first approach
+- Stack elements vertically on mobile
+- Use appropriate breakpoints (sm, md, lg, xl)
+- Touch-friendly button sizes on mobile
+- Hamburger menu if needed for mobile header
+
+### Accessibility
+- Semantic HTML elements
+- ARIA labels where needed
+- Keyboard navigation support
+- Focus visible states
+- Alt text for icons (or aria-labels)
+- Color contrast compliance
+
+## Error Handling
+- Network errors: Show friendly message, retry button
+- Auth errors: Display specific error from Supabase
+- Not found: Show 404-style message if list doesn't exist
+- Permission errors: Redirect to dashboard
+- Empty states: Helpful guidance for users
+
+## Key Features
+
+### Authentication Flow
+1. User lands on Sign-In page
+2. Can toggle to Sign-Up mode
+3. After successful auth, redirect to dashboard
+4. Auth state persists (Supabase session)
+5. Protected routes check auth before rendering
+6. Sign-out clears session and redirects to `/`
+
+### Lists Management Flow
+1. Dashboard fetches all user's lists on mount
+2. Click "Add New List" opens form
+3. Submit creates list in DB and updates UI
+4. Click list card navigates to detail page
+5. Delete list shows confirmation, removes from DB
+
+### Tasks Management Flow
+1. List page fetches tasks on mount
+2. Type in input and press Enter to add task
+3. Click checkbox to toggle completion
+4. Click task text to edit inline
+5. Click delete icon to remove task
+6. All changes immediately sync with DB
+
+## Additional Requirements
+- Use modern React patterns (functional components, hooks)
+- Implement proper error boundaries
+- Add loading states for all async operations
+- Handle edge cases gracefully
+- Use async/await for database operations
+- Proper cleanup in useEffect hooks
+- Memoize expensive computations if needed
+- Organize code with clear separation of concerns
+
+## Deliverables
+1. Fully functional React application
+2. All components properly structured
+3. Supabase client integration
+4. Routing with protected routes
+5. Responsive UI with Tailwind CSS
+6. Clean, commented code
+7. Basic README with:
+   - How to run the app
+   - Required environment variables
+   - Brief feature overview
+
+## Success Criteria
+✅ Users can sign up and sign in
+✅ Users can view all their lists on dashboard
+✅ Users can create new lists
+✅ Users can navigate to list detail page
+✅ Users can add, edit, complete, and delete tasks
+✅ Users can edit list names
+✅ Users can delete lists
+✅ All data syncs with Supabase backend
+✅ UI is responsive and polished
+✅ No console errors or warnings
+✅ Smooth user experience with proper loading/error states
+✅ App handles authentication state correctly
+
+Build this with modern React best practices, clean component architecture, and a polished, user-friendly interface.
