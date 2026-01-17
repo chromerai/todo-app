@@ -1,64 +1,40 @@
-import { Switch, Route, Redirect } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { Switch, Route, useLocation } from "wouter";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import AuthPage from "./components/Auth/AuthPage";
+import Dashboard from "./components/Dashboard/Dashboard";
+import TodoListPage from "./components/TodoList/TodoListPage";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/use-auth";
-import { Layout } from "@/components/layout";
-import { Loader2 } from "lucide-react";
-
-import LandingPage from "@/pages/landing";
-import Dashboard from "@/pages/dashboard";
-import ListDetail from "@/pages/list-detail";
 import NotFound from "@/pages/not-found";
+import { useEffect } from "react";
 
-function ProtectedRoute({ component: Component, ...rest }: any) {
-  const { user, isLoading } = useAuth();
+function RedirectToDashboard() {
+  const { user, loading } = useAuth();
+  const [, setLocation] = useLocation();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!loading && user) {
+      setLocation("/dashboard");
+    }
+  }, [user, loading, setLocation]);
 
-  if (!user) {
-    return <Redirect to="/" />;
-  }
-
-  return <Component {...rest} />;
+  return <AuthPage />;
 }
 
 function Router() {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <Switch>
-      <Route path="/">
-        {user ? <Redirect to="/dashboard" /> : <LandingPage />}
-      </Route>
-      
+      <Route path="/" component={RedirectToDashboard} />
       <Route path="/dashboard">
-        <Layout>
-          <ProtectedRoute component={Dashboard} />
-        </Layout>
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
       </Route>
-      
-      <Route path="/list/:id">
-        <Layout>
-          <ProtectedRoute component={ListDetail} />
-        </Layout>
+      <Route path="/list/:listId">
+        <ProtectedRoute>
+          <TodoListPage />
+        </ProtectedRoute>
       </Route>
-      
       <Route component={NotFound} />
     </Switch>
   );
@@ -66,12 +42,10 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <Router />
+      <Toaster />
+    </AuthProvider>
   );
 }
 
