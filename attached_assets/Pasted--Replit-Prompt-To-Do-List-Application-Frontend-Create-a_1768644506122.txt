@@ -155,34 +155,6 @@ Use React Router v6:
 - Redirect to `/` if not authenticated
 - Show loading state while checking auth
 
-## Component Structure
-```
-src/
-├── components/
-│   ├── Auth/
-│   │   ├── AuthPage.jsx (combined sign-in/sign-up)
-│   ├── Dashboard/
-│   │   ├── Dashboard.jsx
-│   │   ├── ListCard.jsx
-│   │   └── AddListForm.jsx
-│   ├── TodoList/
-│   │   ├── TodoListPage.jsx
-│   │   ├── TaskItem.jsx
-│   │   └── AddTaskInput.jsx
-│   ├── Common/
-│   │   ├── Header.jsx
-│   │   ├── ConfirmDialog.jsx
-│   │   └── LoadingSpinner.jsx
-│   └── ProtectedRoute.jsx
-├── context/
-│   └── AuthContext.jsx (manages auth state globally)
-├── lib/
-│   └── supabaseClient.js
-├── App.jsx
-├── main.jsx
-└── index.css (Tailwind imports)
-```
-
 ## UI/UX Requirements
 
 ### Styling
