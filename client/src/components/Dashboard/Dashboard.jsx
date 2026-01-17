@@ -22,8 +22,8 @@ export default function Dashboard() {
       const { data, error } = await supabase
         .from('lists')
         .select('*')
-        .eq('userId', user.id)
-        .order('createdAt', { ascending: false })
+        .eq('userid', user.id)
+        .order('createdat', { ascending: false })
 
       if (error) throw error
       setLists(data)
@@ -41,7 +41,7 @@ export default function Dashboard() {
     try {
       const { error } = await supabase
         .from('lists')
-        .insert([{ list_name: listName, userId: user.id }])
+        .insert([{ list_name: listName, userid: user.id }])
 
       if (error) throw error
       fetchLists()
@@ -78,7 +78,7 @@ export default function Dashboard() {
             </Card>
 
             {lists.map(list => (
-              <Link key={list.listId} href={`/list/${list.listId}`}>
+              <Link key={list.listid} href={`/list/${list.listid}`}>
                 <Card className="cursor-pointer hover-elevate h-full">
                   <CardHeader>
                     <CardTitle>{list.list_name}</CardTitle>
@@ -90,7 +90,7 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Created {new Date(list.createdAt).toLocaleDateString()}
+                      Created {new Date(list.createdat).toLocaleDateString()}
                     </p>
                   </CardContent>
                 </Card>

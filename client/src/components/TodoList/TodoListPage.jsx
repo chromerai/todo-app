@@ -29,7 +29,7 @@ export default function TodoListPage() {
     const { data, error } = await supabase
       .from('lists')
       .select('*')
-      .eq('listId', listId)
+      .eq('listid', listId)
       .single()
     if (error) {
       toast({ title: 'Error', description: 'List not found', variant: 'destructive' })
@@ -43,8 +43,8 @@ export default function TodoListPage() {
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('listId', listId)
-      .order('createdAt', { ascending: false })
+      .eq('listid', listId)
+      .order('createdat', { ascending: false })
     if (error) throw error
     setTasks(data)
     setLoading(false)
@@ -57,7 +57,7 @@ export default function TodoListPage() {
     try {
       const { error } = await supabase
         .from('tasks')
-        .insert([{ listId, task_text: newTask, isCompleted: false }])
+        .insert([{ listid: listId, task_text: newTask, iscompleted: false }])
       if (error) throw error
       setNewTask('')
       fetchTasks()
@@ -70,10 +70,10 @@ export default function TodoListPage() {
     try {
       const { error } = await supabase
         .from('tasks')
-        .update({ isCompleted: !isCompleted })
-        .eq('taskId', taskId)
+        .update({ iscompleted: !isCompleted })
+        .eq('taskid', taskId)
       if (error) throw error
-      setTasks(tasks.map(t => t.taskId === taskId ? { ...t, isCompleted: !isCompleted } : t))
+      setTasks(tasks.map(t => t.taskid === taskId ? { ...t, iscompleted: !isCompleted } : t))
     } catch (error) {
       toast({ title: 'Error updating task', description: error.message, variant: 'destructive' })
     }
@@ -81,9 +81,9 @@ export default function TodoListPage() {
 
   const deleteTask = async (taskId) => {
     try {
-      const { error } = await supabase.from('tasks').delete().eq('taskId', taskId)
+      const { error } = await supabase.from('tasks').delete().eq('taskid', taskId)
       if (error) throw error
-      setTasks(tasks.filter(t => t.taskId !== taskId))
+      setTasks(tasks.filter(t => t.taskid !== taskId))
     } catch (error) {
       toast({ title: 'Error deleting task', description: error.message, variant: 'destructive' })
     }
@@ -92,7 +92,7 @@ export default function TodoListPage() {
   const deleteList = async () => {
     if (!confirm('Delete this list and all its tasks?')) return
     try {
-      const { error } = await supabase.from('lists').delete().eq('listId', listId)
+      const { error } = await supabase.from('lists').delete().eq('listid', listId)
       if (error) throw error
       setLocation('/dashboard')
     } catch (error) {
@@ -133,17 +133,17 @@ export default function TodoListPage() {
 
         <div className="space-y-3">
           {tasks.map(task => (
-            <div key={task.taskId} className="flex items-center justify-between p-3 border rounded-lg bg-card hover-elevate">
+            <div key={task.taskid} className="flex items-center justify-between p-3 border rounded-lg bg-card hover-elevate">
               <div className="flex items-center gap-3 flex-1">
                 <Checkbox 
-                  checked={task.isCompleted} 
-                  onCheckedChange={() => toggleTask(task.taskId, task.isCompleted)}
+                  checked={task.iscompleted} 
+                  onCheckedChange={() => toggleTask(task.taskid, task.iscompleted)}
                 />
-                <span className={task.isCompleted ? 'line-through text-muted-foreground' : ''}>
+                <span className={task.iscompleted ? 'line-through text-muted-foreground' : ''}>
                   {task.task_text}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => deleteTask(task.taskId)}>
+              <Button variant="ghost" size="icon" onClick={() => deleteTask(task.taskid)}>
                 <Trash2 className="w-4 h-4 text-muted-foreground" />
               </Button>
             </div>
